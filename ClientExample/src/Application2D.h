@@ -32,9 +32,9 @@ public:
 	static float GetExtents() { return m_extents; }
 
 private:
-	void PacketReceived(const BCNet::Packet packet);
+	void PacketReceived(const BCNet::Packet packet); // Packet received callback.
 
-	void DoEchoCommand(const std::string parameters);
+	void DoEchoCommand(const std::string parameters); // Echo command implementation.
 
 protected:
 	aie::Renderer2D *m_2dRenderer = nullptr;

@@ -18,11 +18,6 @@
 
 using namespace BCNet;
 
-IBCNetClient *InitClient()
-{
-	return new BCNetClient();
-}
-
 BCNetClient *BCNetClient::s_callbackInstance = nullptr;
 BCNetClient::BCNetClient()
 {
@@ -70,6 +65,7 @@ void BCNet::BCNetClient::Start()
 		m_commandThread.join(); // Wait for the thread to finish execution.
 	m_commandThread = std::thread([this]()
 	{
+		// Just gets whatever the user has put into the standard input handle then pushes it into the command queue.
 		while (!m_shouldQuit)
 		{
 			char szLine[4000];
@@ -104,7 +100,7 @@ void BCNet::BCNetClient::Start()
 
 void BCNet::BCNetClient::Stop()
 {
-	if (m_shouldQuit == true)
+	if (m_shouldQuit == true) // Shouldn't stop the client when it has already been stopped.
 		return;
 
 	m_shouldQuit = true;
@@ -123,18 +119,19 @@ void BCNet::BCNetClient::Stop()
 
 void BCNetClient::ConnectToServer(const std::string &ipAddress, const int port)
 {
-	if (m_networking)
+	if (m_networking) // Is already connected, return.
 		return;
-	if (ipAddress.empty())
+	if (ipAddress.empty()) // No IP Address entered?
 		return;
 
 	int usedPort = port;
-	if (port <= 0)
+	if (port <= 0) // Port is invalid, use default.
 		usedPort = DEFAULT_SERVER_PORT;
 
 	SteamNetworkingIPAddr addrServer;
 	addrServer.Clear();
 
+	// Check if server address is valid.
 	if (addrServer.IsIPv6AllZeros())
 	{
 		if (!addrServer.ParseString(ipAddress.c_str()))
@@ -171,6 +168,9 @@ void BCNetClient::ConnectToServer(const std::string &ipAddress, const int port)
 
 void BCNetClient::CloseConnection()
 {
+	if (m_networking == false) // Shouldn't disconnect if it's already disconnected.
+		return;
+
 	m_networking = false;
 
 	m_interface->CloseConnection(m_connection, 0, "Closed by Client", true);
@@ -180,6 +180,7 @@ void BCNetClient::CloseConnection()
 		m_disconnectedCallback();
 }
 
+// The main network thread function.
 void BCNetClient::DoNetworking()
 {
 	s_callbackInstance = this;
@@ -190,7 +191,6 @@ void BCNetClient::DoNetworking()
 		std::cout << "Error: Failed to initialize GameNetworkingSockets" << std::endl;
 		return;
 	}
-
 	m_interface = SteamNetworkingSockets();
 
 	std::cout << "Client started..." << std::endl;
@@ -233,8 +233,11 @@ void BCNetClient::PollNetworkMessages()
 		}
 		assert(numMsgs == 1 && msg);
 
-		if (m_packetReceivedCallback)
-			m_packetReceivedCallback(Packet(msg->m_pData, (size_t)msg->m_cbSize));
+		if (msg->m_cbSize) // Packet is valid.
+		{
+			if (m_packetReceivedCallback)
+				m_packetReceivedCallback(Packet(msg->m_pData, (size_t)msg->m_cbSize)); // Do callback.
+		}
 
 		msg->Release(); // No longer needed.
 	}
@@ -258,11 +261,11 @@ void BCNetClient::HandleUserCommands()
 
 		for (auto [cmd, callback] : m_commandCallbacks)
 		{
-			if (strcmp(command.c_str(), cmd.c_str()) == 0)
+			if (strcmp(command.c_str(), cmd.c_str()) == 0) // Command exists.
 			{
 				if (callback)
 				{
-					callback(parameters);
+					callback(parameters); // Do command.
 					commandFinished = true;
 				}
 			}
@@ -274,6 +277,7 @@ void BCNetClient::HandleUserCommands()
 	}
 }
 
+// Utility.
 bool BCNetClient::GetNextCommand(std::string &result)
 {
 	bool input = false;
@@ -298,6 +302,7 @@ bool BCNetClient::GetNextCommand(std::string &result)
 	return input;
 }
 
+// Utility.
 // Basically just splits the command out into two strings which make up the initial command and it's parameters.
 void BCNetClient::ParseCommand(const std::string &command, std::string *outCommand, std::string *outParams)
 {
@@ -338,6 +343,7 @@ void BCNetClient::AddCustomCommand(std::string command, ClientCommandCallback ca
 	m_commandCallbacks[command] = callback;
 }
 
+// Gathers all the commands into a string.
 std::string BCNetClient::PrintCommandList()
 {
 	std::stringstream ss;
@@ -389,8 +395,9 @@ void BCNetClient::OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChan
 			m_interface->CloseConnection(m_connection, 0, nullptr, false);
 			m_connection = k_HSteamNetConnection_Invalid;
 			m_connectionStatus = ConnectionStatus::DISCONNECTED;
+
 			if (m_disconnectedCallback)
-				m_disconnectedCallback();
+				m_disconnectedCallback(); // Do callback.
 		} break;
 		case k_ESteamNetworkingConnectionState_Connecting:
 		{
@@ -401,8 +408,9 @@ void BCNetClient::OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChan
 			// Handle on connected.
 			std::cout << "Connected to server" << std::endl;
 			m_connectionStatus = ConnectionStatus::CONNECTED;
+
 			if (m_connectedCallback)
-				m_connectedCallback();
+				m_connectedCallback(); // Do callback.
 		} break;
 		default:
 		{

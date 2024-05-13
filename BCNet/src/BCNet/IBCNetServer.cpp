@@ -4,6 +4,7 @@
 
 using namespace BCNet;
 
+// Implement function from interface header.
 extern "C" BCNET_API IBCNetServer *InitServer()
 {
 	return new BCNetServer();

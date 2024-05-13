@@ -16,11 +16,14 @@
 // Forward Declare.
 struct SteamNetConnectionStatusChangedCallback_t;
 struct SteamNetworkingIPAddr;
-
 class ISteamNetworkingSockets;
+
+typedef unsigned int uint32;
 
 namespace BCNet
 {
+	// Implements the client interface.
+	// Most methods are explained in the interface header, don't really wanna repeat it here.
 	class BCNetClient : public IBCNetClient
 	{
 	public:
@@ -48,18 +51,21 @@ namespace BCNet
 		virtual ConnectionStatus &GetConnectionStatus() override { return m_connectionStatus; }
 
 	private:
-		void DoNetworking();
+		void DoNetworking(); // The main network thread function.
 
-		void PollNetworkMessages();
-		void PollConnectionStateChanges();
+		void PollNetworkMessages(); // Handles incoming messages/packets.
+		void PollConnectionStateChanges(); // Handles connection state.
 
-		void HandleUserCommands();
+		void HandleUserCommands(); // Handles incoming commands.
 		bool GetNextCommand(std::string &result);
-		void ParseCommand(const std::string &command, std::string *outCommand, std::string *outParams);
+		// TODO: Should move into the utility header since it's the same in both the server and client classes.
+		void ParseCommand(const std::string &command, std::string *outCommand, std::string *outParams); // Utility.
 
-		void OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChangedCallback_t *pInfo);
+		// GameNetworkingSockets Callbacks.
+		void OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChangedCallback_t *pInfo); // Handles connection status.
 		static void SteamNetConnectionStatusChangedCallback(SteamNetConnectionStatusChangedCallback_t *pInfo);
 
+		// Default command implementations.
 		void DoQuitCommand(const std::string parameters);
 		void DoConnectCommand(const std::string parameters);
 		void DoDisconnectCommand(const std::string parameters);
@@ -69,23 +75,23 @@ namespace BCNet
 	private:
 		std::map<std::string, ClientCommandCallback> m_commandCallbacks;
 
-		std::mutex m_mutexCommandQueue;
+		std::mutex m_mutexCommandQueue; // Thread stuff.
 		std::queue<std::string> m_commandQueue;
 
-		std::thread m_networkThread;
-		std::thread m_commandThread;
+		std::thread m_networkThread; // Does networking stuff.
+		std::thread m_commandThread; // Does command stuff.
 
-		ISteamNetworkingSockets *m_interface;
+		ISteamNetworkingSockets *m_interface; // GameNetworkingSockets
+		uint32 m_connection; // HSteamNetConnection
 
-		uint32 m_connection;
 		ConnectionStatus m_connectionStatus = ConnectionStatus::DISCONNECTED;
 
 		ConnectedCallback m_connectedCallback;
 		DisconnectedCallback m_disconnectedCallback;
 		PacketReceivedCallback m_packetReceivedCallback;
 
-		bool m_shouldQuit = false;
-		bool m_networking = false;
+		bool m_shouldQuit = false; // Whether the network thread is running.
+		bool m_networking = false; // Whether the client is connected.
 
 		static BCNetClient *s_callbackInstance;
 

@@ -8,11 +8,15 @@
 #include <stdio.h>
 #include <string.h>
 
+// Different from Misc/Utility.h since it's header is invisible to applications.
+
 static void SplitLine(char *line, char **outArgs) // Utility used for ParseCommandParameters()
 {
+	// Splits a line by spaces into an array.
 	if (outArgs == nullptr)
 		return;
 
+	// Don't ask, took it from stackoverflow.
 	char *tmp = strchr(line, ' ');
 	if (tmp)
 	{
@@ -27,15 +31,17 @@ static void SplitLine(char *line, char **outArgs) // Utility used for ParseComma
 	*outArgs = tmp;
 }
 
-char *Trim(char *s)
+char *Trim(char *s) // Utility used for ParseCommandParameters()
 {
-	if (!s)
+	// Trims any spaces on either side of string.
+	if (!s) // Invalid string.
 		return nullptr;
 	if (!*s)
 		return s;
 
-	while (isspace(*s)) s++;
+	while (isspace(*s)) s++; // Trims left.
 
+	// Trims right.
 	char *ptr;
 	for (ptr = s + strlen(s) - 1; (ptr >= s) && isspace(*ptr); --ptr);
 	ptr[1] = '\0';
@@ -49,7 +55,7 @@ void BCNet::ParseCommandParameters(const std::string &parameters, int *outCount,
 	if (outCount == nullptr || outArray == nullptr)
 		return;
 
-	const int maxArgs = 128;
+	const int maxArgs = 128; // TODO: Maybe there shouldn't be an arbitrary limit?
 
 	size_t length = parameters.length() + 1;
 	char *rawParams = new char[length];

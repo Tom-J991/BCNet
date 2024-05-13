@@ -72,6 +72,7 @@ void BCNetServer::Start(const int port)
 		m_commandThread.join(); // Wait for the thread to finish execution.
 	m_commandThread = std::thread([this]()
 	{
+		// Just gets whatever the user has put into the standard input handle then pushes it into the command queue.
 		while (!m_shouldQuit)
 		{
 			char szLine[4000];
@@ -100,6 +101,9 @@ void BCNetServer::Start(const int port)
 
 void BCNetServer::Stop()
 {
+	if (m_shouldQuit == true || m_networking == false) // Shouldn't stop the server when it has already been stopped.
+		return;
+
 	if (m_networkThread.joinable())
 		m_networkThread.join(); // Wait for the thread to finish execution.
 
@@ -110,6 +114,7 @@ void BCNetServer::Stop()
 	m_networking = false;
 }
 
+// The main network thread function.
 void BCNetServer::DoNetworking()
 {
 	s_callbackInstance = this;
@@ -206,14 +211,15 @@ void BCNetServer::PollNetworkMessages()
 		auto itClient = m_connectedClients.find(msg->m_conn); // The client who sent the packet.
 		assert(itClient != m_connectedClients.end());
 
-		if (msg->m_cbSize)
+		if (msg->m_cbSize) // Packet is valid.
 		{
 			Packet packet(msg->m_pData, (size_t)msg->m_cbSize);
 
 			DefaultPacketID id;
 			PacketStreamReader packetReader(packet);
 			packetReader >> id;
-
+			
+			// Handle packet defaults.
 			switch (id)
 			{
 				case DefaultPacketID::PACKET_NICKNAME:
@@ -226,6 +232,7 @@ void BCNetServer::PollNetworkMessages()
 
 					std::string nickName;
 					packetReader >> nickName;
+					// TODO: Empty check doesn't really work properly.
 					if (!nickName.empty() || !std::all_of(nickName.begin(), nickName.end(), isspace)) // String isn't empty and string isn't just spaces.
 					{
 						bool nickNameExists = false;
@@ -246,7 +253,6 @@ void BCNetServer::PollNetworkMessages()
 						{
 							std::string s(itClient->second.nickName + " is now " + nickName);
 							std::cout << s << std::endl;
-
 							packetWriter.WriteString(s);
 
 							SetClientNickname(msg->m_conn, nickName);
@@ -257,7 +263,7 @@ void BCNetServer::PollNetworkMessages()
 						packetWriter.WriteString(std::string("Set Nickname Failed: No Nickname Provided."));
 					}
 
-					SendPacketToAllClients(packetWriter.GetPacket());
+					SendPacketToAllClients(packetWriter.GetPacket()); // Tell other clients that their nickname has been changed.
 					packet.Release();
 				} continue;
 				case DefaultPacketID::PACKET_WHOSONLINE:
@@ -270,13 +276,13 @@ void BCNetServer::PollNetworkMessages()
 					packetWriter.WriteRaw<DefaultPacketID>(DefaultPacketID::PACKET_SERVER);
 					packetWriter.WriteString(s);
 
-					SendPacketToClient(msg->m_conn, packet);
+					SendPacketToClient(msg->m_conn, packet); // Tell client who's online.
 					packet.Release();
 				} continue;
 			}
 
 			if (m_packetReceivedCallback)
-				m_packetReceivedCallback(itClient->second, packet);
+				m_packetReceivedCallback(itClient->second, packet); // Do callback.
 		}
 
 		msg->Release(); // No longer needed.
@@ -301,11 +307,11 @@ void BCNetServer::HandleUserCommands()
 
 		for (auto [cmd, callback] : m_commandCallbacks)
 		{
-			if (strcmp(command.c_str(), cmd.c_str()) == 0)
+			if (strcmp(command.c_str(), cmd.c_str()) == 0) // Command exists.
 			{
 				if (callback)
 				{
-					callback(parameters);
+					callback(parameters); // Do command.
 					commandFinished = true;
 				}
 			}
@@ -317,6 +323,7 @@ void BCNetServer::HandleUserCommands()
 	}
 }
 
+// Utility.
 bool BCNetServer::GetNextCommand(std::string &result)
 {
 	bool input = false;
@@ -341,6 +348,7 @@ bool BCNetServer::GetNextCommand(std::string &result)
 	return input;
 }
 
+// Utility.
 // Basically just splits the command out into two strings which make up the initial command and it's parameters.
 void BCNetServer::ParseCommand(const std::string &command, std::string *outCommand, std::string *outParams)
 {
@@ -381,6 +389,7 @@ void BCNetServer::AddCustomCommand(std::string command, ServerCommandCallback ca
 	m_commandCallbacks[command] = callback;
 }
 
+// Gathers all the commands into a string.
 std::string BCNetServer::PrintCommandList()
 {
 	std::stringstream ss;
@@ -395,6 +404,7 @@ std::string BCNetServer::PrintCommandList()
 	return ss.str();
 }
 
+// Gathers all the connected users into a string.
 std::string BCNet::BCNetServer::PrintConnectedUsers()
 {
 	std::stringstream ss;
@@ -443,6 +453,9 @@ void BCNetServer::KickClient(uint32 clientID)
 
 	std::cout << "Kicked " << it->second.nickName << " [" << (int)clientID << "]" << std::endl;
 	m_interface->CloseConnection(clientID, 0, "Kicked by server", false);
+
+	m_connectedClients.erase(clientID);
+	m_clientCount--;
 }
 
 void BCNetServer::KickClient(const std::string &nickName)
@@ -509,11 +522,11 @@ void BCNetServer::OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChan
 				packetWriter.WriteRaw<DefaultPacketID>(DefaultPacketID::PACKET_SERVER);
 				packetWriter.WriteString(std::string(itClient->second.nickName + " has left."));
 
-				SendPacketToAllClients(packetWriter.GetPacket(), pInfo->m_hConn);
+				SendPacketToAllClients(packetWriter.GetPacket(), pInfo->m_hConn); // Tell other clients that they have left.
 				packet.Release();
 
 				if (m_disconnectedCallback)
-					m_disconnectedCallback(itClient->second);
+					m_disconnectedCallback(itClient->second); // Do callback.
 
 				m_connectedClients.erase(itClient);
 				m_clientCount--;
@@ -558,7 +571,7 @@ void BCNetServer::OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChan
 			m_clientCount++;
 
 			if (m_connectedCallback)
-				m_connectedCallback(client);
+				m_connectedCallback(client); // Do callback.
 
 		} break;
 		case k_ESteamNetworkingConnectionState_Connected:

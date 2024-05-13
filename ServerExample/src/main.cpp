@@ -8,7 +8,7 @@
 
 BCNet::IBCNetServer *g_server;
 
-void PacketReceived(const BCNet::ClientInfo &clientData, const BCNet::Packet packet)
+void PacketReceived(const BCNet::ClientInfo &clientData, const BCNet::Packet packet) // Packet received callback.
 {
 	BCNet::PacketStreamReader packetReader(packet);
 
@@ -47,7 +47,7 @@ void PacketReceived(const BCNet::ClientInfo &clientData, const BCNet::Packet pac
 	}
 }
 
-void DoEchoCommand(const std::string parameters)
+void DoEchoCommand(const std::string parameters) // Echo command implementation.
 {
 	if (parameters.empty())
 	{
@@ -73,22 +73,26 @@ void DoEchoCommand(const std::string parameters)
 	BCNet::PacketStreamWriter packetWriter(packet);
 	packetWriter << PacketID::PACKET_TEXT_MESSAGE << s;
 	
-	g_server->SendPacketToAllClients(packetWriter.GetPacket());
+	g_server->SendPacketToAllClients(packetWriter.GetPacket()); // Send message to all connected clients.
 
 	packet.Release();
 }
 
+// ----------------- Entry point.
 int main()
 {
 	g_server = BCNet::InitServer();
 
+	// Setup callbacks.
 	g_server->SetPacketReceivedCallback(PacketReceived);
 
+	// Add custom commands.
 	BCNet::ServerCommandCallback echoCommand = DoEchoCommand;
 	g_server->AddCustomCommand("/echo", echoCommand);
 
+	// Run Server.
 	g_server->Start();
-	g_server->Stop();
+	g_server->Stop(); // g_server->Start() calls a loop so we can do this immediately after without really any problems.
 
 	if (g_server != nullptr)
 	{

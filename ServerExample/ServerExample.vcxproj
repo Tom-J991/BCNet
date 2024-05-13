@@ -14,7 +14,7 @@
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{a3161c93-d858-4461-b966-56f1e7caaafa}</ProjectGuid>
-    <RootNamespace>NetworkingExerciseServer</RootNamespace>
+    <RootNamespace>ServerExample</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

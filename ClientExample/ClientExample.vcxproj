@@ -16,7 +16,7 @@
     <ProjectGuid>{54ca7ca5-2a68-48c4-8aec-f14c2861cf0c}</ProjectGuid>
     <RootNamespace>ProgrammingExercise</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>NetworkingExercise_Client</ProjectName>
+    <ProjectName>ClientExample</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -58,7 +58,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Shared\src;$(SolutionDir)external\aieBootstrap\bootstrap;$(SolutionDir)external\aieBootstrap\dependencies\glm;$(SolutionDir)BCNet\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Shared\src;$(ProjectDir)external\aieBootstrap\bootstrap;$(ProjectDir)external\aieBootstrap\dependencies\glm;$(SolutionDir)BCNet\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -78,7 +78,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Shared\src;$(SolutionDir)external\aieBootstrap\bootstrap;$(SolutionDir)external\aieBootstrap\dependencies\glm;$(SolutionDir)BCNet\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Shared\src;$(ProjectDir)external\aieBootstrap\bootstrap;$(ProjectDir)external\aieBootstrap\dependencies\glm;$(SolutionDir)BCNet\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -105,7 +105,7 @@
     <ProjectReference Include="..\BCNet\BCNet.vcxproj">
       <Project>{8129183e-92da-47e1-b516-237054dffafc}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\external\aieBootstrap\bootstrap\Bootstrap.vcxproj">
+    <ProjectReference Include="external\aieBootstrap\bootstrap\Bootstrap.vcxproj">
       <Project>{af59bb0b-e059-4773-83dc-728a949647da}</Project>
     </ProjectReference>
   </ItemGroup>
