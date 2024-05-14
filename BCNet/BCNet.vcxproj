@@ -58,17 +58,27 @@
       <PreprocessorDefinitions>BCNET_API_EXPORTS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)include;$(SolutionDir)external\GameNetworkingSockets\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)include;$(ProjectDir)external\GameNetworkingSockets\include</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <UndefinePreprocessorDefinitions>STEAMNETWORKINGSOCKETS_STATIC_LINK;</UndefinePreprocessorDefinitions>
+      <UndefinePreprocessorDefinitions>
+      </UndefinePreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>GameNetworkingSockets.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)external\GameNetworkingSockets\lib\Debug;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)external\GameNetworkingSockets\lib\Debug;</AdditionalLibraryDirectories>
     </Link>
+    <Lib>
+      <AdditionalDependencies>GameNetworkingSockets.lib;</AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)external\GameNetworkingSockets\lib\Debug;</AdditionalLibraryDirectories>
+    </Lib>
+    <PostBuildEvent>
+      <Command>FOR /R "$(ProjectDir)external\GameNetworkingSockets\lib\Debug\" %%G IN (*.dll) DO (XCOPY %%G "$(SolutionDir)bin\$(Platform)\$(Configuration)\" /y /f)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -79,18 +89,28 @@
       <PreprocessorDefinitions>BCNET_API_EXPORTS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)include;$(SolutionDir)external\GameNetworkingSockets\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)include;$(ProjectDir)external\GameNetworkingSockets\include</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <UndefinePreprocessorDefinitions>STEAMNETWORKINGSOCKETS_STATIC_LINK;</UndefinePreprocessorDefinitions>
+      <UndefinePreprocessorDefinitions>
+      </UndefinePreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>GameNetworkingSockets.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)external\GameNetworkingSockets\lib\Release;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>GameNetworkingSockets_s.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)external\GameNetworkingSockets\lib\Release;</AdditionalLibraryDirectories>
     </Link>
+    <Lib>
+      <AdditionalDependencies>GameNetworkingSockets.lib;</AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)external\GameNetworkingSockets\lib\Release;</AdditionalLibraryDirectories>
+    </Lib>
+    <PostBuildEvent>
+      <Command>FOR /R "$(ProjectDir)external\GameNetworkingSockets\lib\Release\" %%G IN (*.dll) DO (XCOPY %%G "$(SolutionDir)bin\$(Platform)\$(Configuration)\" /y /f)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\BCNet\IBCNetServer.h" />

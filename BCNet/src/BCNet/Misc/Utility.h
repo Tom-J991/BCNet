@@ -8,6 +8,6 @@
 
 namespace BCNet
 {
-	inline bool BCNET_API StringIsNumber(const std::string &str);
+	extern "C" bool BCNET_API StringIsNumber(const std::string &str);
 
 }
