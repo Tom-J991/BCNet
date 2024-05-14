@@ -107,11 +107,15 @@
   <ItemGroup>
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\MessageObject.cpp" />
+    <ClCompile Include="src\MessagePool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Shared\src\Shared.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\Common.h" />
+    <ClInclude Include="src\MessageObject.h" />
+    <ClInclude Include="src\MessagePool.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\BCNet\BCNet.vcxproj">

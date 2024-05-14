@@ -37,19 +37,24 @@ BCNetServer::~BCNetServer()
 	m_networking = false;
 }
 
-void BCNet::BCNetServer::SetConnectedCallback(const ConnectedCallback &callback)
+void BCNetServer::SetConnectedCallback(const ConnectedCallback &callback)
 {
 	m_connectedCallback = callback;
 }
 
-void BCNet::BCNetServer::SetDisconnectedCallback(const DisconnectedCallback &callback)
+void BCNetServer::SetDisconnectedCallback(const DisconnectedCallback &callback)
 {
 	m_disconnectedCallback = callback;
 }
 
-void BCNet::BCNetServer::SetPacketReceivedCallback(const PacketReceivedCallback &callback)
+void BCNetServer::SetPacketReceivedCallback(const PacketReceivedCallback &callback)
 {
 	m_packetReceivedCallback = callback;
+}
+
+void BCNetServer::SetOutputLogCallback(const ServerOutputLogCallback &callback)
+{
+	m_outputLogCallback = callback;
 }
 
 void BCNetServer::Start(const int port)
@@ -112,6 +117,11 @@ void BCNetServer::Stop()
 
 	m_shouldQuit = true;
 	m_networking = false;
+}
+
+std::string BCNetServer::GetLatestOutput()
+{
+	return m_outputLog.back(); // Back of the queue should always be the latest.
 }
 
 // The main network thread function.
@@ -405,7 +415,7 @@ std::string BCNetServer::PrintCommandList()
 }
 
 // Gathers all the connected users into a string.
-std::string BCNet::BCNetServer::PrintConnectedUsers()
+std::string BCNetServer::PrintConnectedUsers()
 {
 	std::stringstream ss;
 	ss << "Current Users [" << m_clientCount << "]: " << std::endl;
@@ -484,6 +494,18 @@ void BCNetServer::KickClient(const std::string &nickName)
 
 	m_connectedClients.erase(clientID);
 	m_clientCount--;
+}
+
+void BCNetServer::Log(std::string message)
+{
+	std::cout << message << std::endl;
+
+	if ((m_outputLog.size() + 1) > m_maxOutputLog)
+		m_outputLog.pop(); // Removes oldest message.
+	m_outputLog.push(message); // Adds latest message.
+
+	if (m_outputLogCallback)
+		m_outputLogCallback(); // Do callback.
 }
 
 void BCNetServer::OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChangedCallback_t *pInfo)
@@ -638,7 +660,7 @@ void BCNetServer::DoKickCommand(const std::string parameters) // /kick {-id [ID]
 
 	int count;
 	char *params[128];
-	BCNet::ParseCommandParameters(parameters, &count, params); // Get individual parameters.
+	ParseCommandParameters(parameters, &count, params); // Get individual parameters.
 
 	// Command input should not have both parameters.
 	if (strstr(parameters.c_str(), "-user") != nullptr &&

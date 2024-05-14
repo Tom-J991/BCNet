@@ -41,13 +41,6 @@ void PacketStreamWriter::WriteString(const std::string &string)
 	WriteData((char*)string.data(), sizeof(char) * string.size());
 }
 
-void PacketStreamWriter::WriteString(std::string_view string)
-{
-	size_t size = string.size();
-	WriteData((char*)&size, sizeof(size_t));
-	WriteData((char*)string.data(), sizeof(char) * string.size());
-}
-
 // Implements operator overloads.
 PacketStreamWriter &BCNet::operator<<(PacketStreamWriter &writer, Packet packet)
 {
@@ -55,11 +48,6 @@ PacketStreamWriter &BCNet::operator<<(PacketStreamWriter &writer, Packet packet)
 	return writer;
 }
 PacketStreamWriter &BCNet::operator<<(PacketStreamWriter &writer, const std::string &string)
-{
-	writer.WriteString(string);
-	return writer;
-}
-PacketStreamWriter &BCNet::operator<<(PacketStreamWriter &writer, std::string_view string)
 {
 	writer.WriteString(string);
 	return writer;

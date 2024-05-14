@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Shared.h>
+#include "MessagePool.h"
 
 #include <string>
 
@@ -27,6 +28,7 @@ protected:
 
 private:
 	void PacketReceived(const BCNet::Packet packet); // Packet received callback.
+	void OutputLog(); // Output log callback.
 
 	void DoEchoCommand(const std::string parameters); // Echo command implementation.
 
@@ -35,5 +37,7 @@ protected:
 
 	static unsigned int m_windowWidth;
 	static unsigned int m_windowHeight;
+
+	MessagePool m_outputPool;
 
 };

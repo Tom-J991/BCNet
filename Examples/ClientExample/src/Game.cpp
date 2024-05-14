@@ -27,6 +27,7 @@ bool Game::Run(std::string windowTitle, unsigned int windowWidth, unsigned int w
 {
 	InitAudioDevice();
 	InitWindow(windowWidth, windowHeight, windowTitle.c_str());
+	SetTargetFPS(60);
 	if (fullscreen)
 		ToggleFullscreen();
 	
@@ -62,6 +63,7 @@ bool Game::Start()
 	srand((unsigned int)time(nullptr)); // Set random seed.
 
 	m_networkClient->SetPacketReceivedCallback(BIND_CLIENT_PACKET_RECEIVED_CALLBACK(Game::PacketReceived));
+	m_networkClient->SetOutputLogCallback(BIND_CLIENT_OUTPUT_LOG_CALLBACK(Game::OutputLog));
 
 	BCNet::ClientCommandCallback echoCommand = BIND_COMMAND(Game::DoEchoCommand);
 	m_networkClient->AddCustomCommand("/echo", echoCommand);
@@ -77,12 +79,15 @@ void Game::Shutdown()
 
 void Game::Update(double deltaTime)
 {
-
+	m_outputPool.Update(deltaTime);
+	//std::cout << "Active " << m_outputPool.GetActiveCount() << std::endl;
 }
 
 void Game::Draw()
 {
 	ClearBackground(RAYWHITE);
+
+	m_outputPool.Draw(false);
 }
 
 void Game::PacketReceived(const BCNet::Packet packet)
@@ -94,8 +99,7 @@ void Game::PacketReceived(const BCNet::Packet packet)
 
 	switch (id)
 	{
-		case (PacketID)BCNet::DefaultPacketID::PACKET_SERVER:
-		case PacketID::PACKET_TEXT_MESSAGE:
+		case (PacketID)BCNet::DefaultPacketID::PACKET_SERVER: // Server message.
 		{
 			// Print packet.
 			std::string message;
@@ -103,11 +107,24 @@ void Game::PacketReceived(const BCNet::Packet packet)
 
 			std::cout << message << std::endl;
 		} break;
+		case PacketID::PACKET_TEXT_MESSAGE: // Chat message.
+		{
+			// Print packet.
+			std::string message;
+			packetReader >> message;
+
+			m_networkClient->Log(message);
+		} break;
 		default:
 		{
 			std::cout << "Warning: Unhandled Packet" << std::endl;
 		} return;
 	}
+}
+
+void Game::OutputLog()
+{
+	m_outputPool.Create({ 12.0f, 12.0f + (m_outputPool.GetActiveCount() * 16.0f) }, m_networkClient->GetLatestOutput(), 1.0f, 1.0f, 16);
 }
 
 void Game::DoEchoCommand(const std::string parameters)

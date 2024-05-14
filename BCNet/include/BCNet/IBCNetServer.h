@@ -9,6 +9,7 @@
 #define BIND_SERVER_CONNECTED_CALLBACK(fn) std::bind(&fn, this, std::placeholders::_1)
 #define BIND_SERVER_DISCONNECTED_CALLBACK(fn) std::bind(&fn, this, std::placeholders::_1)
 #define BIND_SERVER_PACKET_RECEIVED_CALLBACK(fn) std::bind(&fn, this, std::placeholders::_1, std::placeholders::_2)
+#define BIND_SERVER_OUTPUT_LOG_CALLBACK(fn) std::bind(&fn, this)
 
 typedef unsigned int uint32;
 
@@ -23,6 +24,7 @@ namespace BCNet
 	};
 
 	using ServerCommandCallback = std::function<void(const std::string)>;
+	using ServerOutputLogCallback = std::function<void()>;
 	using ConnectedCallback = std::function<void(const ClientInfo &)>;
 	using DisconnectedCallback = std::function<void(const ClientInfo &)>;
 	using PacketReceivedCallback = std::function<void(const ClientInfo &, const Packet)>;
@@ -39,7 +41,7 @@ namespace BCNet
 		virtual ~IBCNetServer() = default;
 
 		/// <summary>
-		/// Starts the server.
+		/// Starts the server. The default port is 5456.
 		/// </summary>
 		/// <param name="port">The port the server will listen to.</param>
 		virtual void Start(const int port = -1) = 0;
@@ -70,6 +72,11 @@ namespace BCNet
 		/// The callback function should have a reference to the ClientInfo as a parameter.
 		/// </summary>
 		virtual void SetDisconnectedCallback(const DisconnectedCallback &callback) = 0;
+
+		/// <summary>
+		/// This callback is called whenever the client logs a message.
+		/// </summary>
+		virtual void SetOutputLogCallback(const ServerOutputLogCallback &callback) = 0;
 
 		/// <summary>
 		/// This callback is called whenever the server receives a packet.
@@ -152,6 +159,21 @@ namespace BCNet
 		/// </summary>
 		/// <param name="nickName">The nickname of the client to kick.</param>
 		virtual void KickClient(const std::string &nickName) = 0;
+
+		/// <summary>
+		/// Logs and outputs a message.
+		/// </summary>
+		virtual void Log(std::string message) = 0;
+
+		/// <summary>
+		/// Sets the maximum amount of messages the server will log. The default maximum is 12.
+		/// </summary>
+		virtual void SetMaxOutputLog(unsigned int max) = 0;
+
+		/// <summary>
+		/// Gets the latest message from the server's output log.
+		/// </summary>
+		virtual std::string GetLatestOutput() = 0;
 
 	};
 

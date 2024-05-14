@@ -229,12 +229,6 @@ namespace BCNet
 		void WriteString(const std::string &string);
 
 		/// <summary>
-		/// Writes a string into the stream.
-		/// </summary>
-		/// <param name="string">The string to write.</param>
-		void WriteString(std::string_view string);
-
-		/// <summary>
 		/// Writes data into the stream specified by type.
 		/// </summary>
 		/// <param name="type">The data to write.</param>
@@ -276,7 +270,6 @@ namespace BCNet
 		
 		BCNET_API friend PacketStreamWriter &operator<<(PacketStreamWriter &writer, Packet packet);
 		BCNET_API friend PacketStreamWriter &operator<<(PacketStreamWriter &writer, const std::string &string);
-		BCNET_API friend PacketStreamWriter &operator<<(PacketStreamWriter &writer, std::string_view string);
 
 	private:
 		Packet m_packet;

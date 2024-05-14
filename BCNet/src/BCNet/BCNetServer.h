@@ -36,6 +36,7 @@ namespace BCNet
 		virtual void SetConnectedCallback(const ConnectedCallback &callback) override;
 		virtual void SetDisconnectedCallback(const DisconnectedCallback &callback) override;
 		virtual void SetPacketReceivedCallback(const PacketReceivedCallback &callback) override;
+		virtual void SetOutputLogCallback(const ServerOutputLogCallback &callback) override;
 
 		virtual std::string PrintCommandList() override;
 		virtual void AddCustomCommand(std::string command, ServerCommandCallback callback) override;
@@ -49,6 +50,12 @@ namespace BCNet
 
 		virtual void KickClient(uint32 clientID) override;
 		virtual void KickClient(const std::string &nickName) override;
+
+		virtual void Log(std::string message) override;
+
+		virtual void SetMaxOutputLog(unsigned int max) override { m_maxOutputLog = max; };
+
+		virtual std::string GetLatestOutput() override;
 
 	private:
 		void DoNetworking(); // The main network thread function.
@@ -72,6 +79,8 @@ namespace BCNet
 	private:
 		std::map<std::string, ServerCommandCallback> m_commandCallbacks;
 
+		std::queue<std::string> m_outputLog;
+
 		std::mutex m_mutexCommandQueue; // Thread stuff.
 		std::queue<std::string> m_commandQueue;
 
@@ -88,6 +97,9 @@ namespace BCNet
 		ConnectedCallback m_connectedCallback;
 		DisconnectedCallback m_disconnectedCallback;
 		PacketReceivedCallback m_packetReceivedCallback;
+		ServerOutputLogCallback m_outputLogCallback;
+
+		unsigned int m_maxOutputLog = 12;
 
 		bool m_shouldQuit = false; // Whether the network thread is running.
 		bool m_networking = false; // Whether the server is running.

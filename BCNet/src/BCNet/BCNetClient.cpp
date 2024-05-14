@@ -50,7 +50,12 @@ void BCNetClient::SetPacketReceivedCallback(const PacketReceivedCallback &callba
 	m_packetReceivedCallback = callback;
 }
 
-void BCNet::BCNetClient::Start()
+void BCNetClient::SetOutputLogCallback(const ClientOutputLogCallback &callback)
+{
+	m_outputLogCallback = callback;
+}
+
+void BCNetClient::Start()
 {
 	if (m_networking)
 		return;
@@ -98,7 +103,7 @@ void BCNet::BCNetClient::Start()
 	std::cout << PrintCommandList() << std::endl;
 }
 
-void BCNet::BCNetClient::Stop()
+void BCNetClient::Stop()
 {
 	if (m_shouldQuit == true) // Shouldn't stop the client when it has already been stopped.
 		return;
@@ -136,7 +141,7 @@ void BCNetClient::ConnectToServer(const std::string &ipAddress, const int port)
 	{
 		if (!addrServer.ParseString(ipAddress.c_str()))
 		{
-			std::cout << "Error: Invalid IP address." << std::endl;
+			Log("Error: Invalid IP address.");
 			m_connectionStatus = ConnectionStatus::FAILED;
 			return;
 		}
@@ -149,7 +154,7 @@ void BCNetClient::ConnectToServer(const std::string &ipAddress, const int port)
 	char szAddr[SteamNetworkingIPAddr::k_cchMaxString];
 	addrServer.ToString(szAddr, sizeof(szAddr), true);
 	m_connectionStatus = ConnectionStatus::CONNECTING;
-	std::cout << "Connecting to server " << szAddr << std::endl;
+	Log("Connecting to server " + std::string(szAddr));
 
 	m_networking = true;
 
@@ -159,7 +164,7 @@ void BCNetClient::ConnectToServer(const std::string &ipAddress, const int port)
 	m_connection = m_interface->ConnectByIPAddress(addrServer, 1, &options);
 	if (m_connection == k_HSteamNetConnection_Invalid)
 	{
-		std::cout << "Error: Failed to connect to server." << std::endl;
+		Log("Error: Failed to connect to server.");
 		m_connectionStatus = ConnectionStatus::FAILED;
 		m_networking = false;
 		return;
@@ -180,6 +185,23 @@ void BCNetClient::CloseConnection()
 		m_disconnectedCallback();
 }
 
+std::string BCNetClient::GetLatestOutput()
+{
+	return m_outputLog.back(); // Back of the queue should always be the latest.
+}
+
+void BCNetClient::Log(std::string message)
+{
+	std::cout << message << std::endl;
+
+	if ((m_outputLog.size() + 1) > m_maxOutputLog)
+		m_outputLog.pop(); // Removes oldest message.
+	m_outputLog.push(message); // Adds latest message.
+
+	if (m_outputLogCallback)
+		m_outputLogCallback(); // Do callback.
+}
+
 // The main network thread function.
 void BCNetClient::DoNetworking()
 {
@@ -193,7 +215,7 @@ void BCNetClient::DoNetworking()
 	}
 	m_interface = SteamNetworkingSockets();
 
-	std::cout << "Client started..." << std::endl;
+	Log("Client started...");
 
 	// Loop.
 	while (!m_shouldQuit)
@@ -381,15 +403,15 @@ void BCNetClient::OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChan
 			// Handle client disconnection or connection error.
 			if (pInfo->m_eOldState == k_ESteamNetworkingConnectionState_Connecting) // Failed to connect.
 			{
-				std::cout << "Failed to connect to server. " << pInfo->m_info.m_szEndDebug << std::endl;
+				Log("Failed to connect to server. " + std::string(pInfo->m_info.m_szEndDebug));
 			}
 			else if (pInfo->m_info.m_eState == k_ESteamNetworkingConnectionState_ProblemDetectedLocally) // Connection error.
 			{
-				std::cout << "Lost connection with server. " << pInfo->m_info.m_szEndDebug << std::endl;
+				Log("Lost connection with server. " + std::string(pInfo->m_info.m_szEndDebug));
 			}
 			else
 			{
-				std::cout << "Disconnected from server. " << pInfo->m_info.m_szEndDebug << std::endl; // Connection severed with server.
+				Log("Disconnected from server. " + std::string(pInfo->m_info.m_szEndDebug)); // Connection severed with server.
 			}
 
 			m_interface->CloseConnection(m_connection, 0, nullptr, false);
@@ -406,7 +428,7 @@ void BCNetClient::OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChan
 		case k_ESteamNetworkingConnectionState_Connected:
 		{
 			// Handle on connected.
-			std::cout << "Connected to server" << std::endl;
+			Log("Connected to server");
 			m_connectionStatus = ConnectionStatus::CONNECTED;
 
 			if (m_connectedCallback)
@@ -468,7 +490,7 @@ void BCNetClient::DoNickNameCommand(const std::string parameters)
 
 	int count;
 	char *params[128];
-	BCNet::ParseCommandParameters(parameters, &count, params); // Get individual parameters.
+	ParseCommandParameters(parameters, &count, params); // Get individual parameters.
 
 	std::string nickname = params[0];
 
@@ -483,7 +505,7 @@ void BCNetClient::DoNickNameCommand(const std::string parameters)
 	packet.Release();
 }
 
-void BCNet::BCNetClient::DoWhosOnlineCommand(const std::string parameters)
+void BCNetClient::DoWhosOnlineCommand(const std::string parameters)
 {
 	if (m_connectionStatus != ConnectionStatus::CONNECTED)
 	{
@@ -524,7 +546,7 @@ void BCNetClient::DoConnectCommand(const std::string parameters) // /connect [IP
 
 	int count;
 	char *params[128];
-	BCNet::ParseCommandParameters(parameters, &count, params); // Get individual parameters.
+	ParseCommandParameters(parameters, &count, params); // Get individual parameters.
 
 	// Handle command parameters.
 	std::string ipAddress = "127.0.0.1";

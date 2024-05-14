@@ -9,6 +9,7 @@
 #define BIND_CLIENT_CONNECTED_CALLBACK(fn) std::bind(&fn, this)
 #define BIND_CLIENT_DISCONNECTED_CALLBACK(fn) std::bind(&fn, this)
 #define BIND_CLIENT_PACKET_RECEIVED_CALLBACK(fn) std::bind(&fn, this, std::placeholders::_1)
+#define BIND_CLIENT_OUTPUT_LOG_CALLBACK(fn) std::bind(&fn, this)
 
 typedef unsigned int uint32;
 
@@ -17,6 +18,7 @@ namespace BCNet
 	struct Packet; // Forward Declare.
 	
 	using ClientCommandCallback = std::function<void(const std::string)>;
+	using ClientOutputLogCallback = std::function<void()>;
 	using ConnectedCallback = std::function<void()>;
 	using DisconnectedCallback = std::function<void()>;
 	using PacketReceivedCallback = std::function<void(const Packet)>;
@@ -52,7 +54,7 @@ namespace BCNet
 		virtual void Stop() = 0;
 
 		/// <summary>
-		/// Connects to a server using the provided address.
+		/// Connects to a server using the provided address. The default port is 5456.
 		/// </summary>
 		/// <param name="ipAddress">The address of the server to connect to.</param>
 		/// <param name="port">The port the server is listening to.</param>
@@ -90,6 +92,11 @@ namespace BCNet
 		virtual void SetPacketReceivedCallback(const PacketReceivedCallback &callback) = 0;
 
 		/// <summary>
+		/// This callback is called whenever the client logs a message.
+		/// </summary>
+		virtual void SetOutputLogCallback(const ClientOutputLogCallback &callback) = 0;
+
+		/// <summary>
 		/// Returns a string describing all the commands the user can use to interact with the client.
 		/// </summary>
 		virtual std::string PrintCommandList() = 0;
@@ -123,6 +130,21 @@ namespace BCNet
 		/// Returns the current connection status.
 		/// </summary>
 		virtual ConnectionStatus &GetConnectionStatus() = 0;
+
+		/// <summary>
+		/// Logs and outputs a message.
+		/// </summary>
+		virtual void Log(std::string message) = 0;
+
+		/// <summary>
+		/// Sets the maximum amount of messages the client will log. The default maximum is 12.
+		/// </summary>
+		virtual void SetMaxOutputLog(unsigned int max) = 0;
+
+		/// <summary>
+		/// Gets the latest message from the client's output log.
+		/// </summary>
+		virtual std::string GetLatestOutput() = 0;
 
 	};
 
