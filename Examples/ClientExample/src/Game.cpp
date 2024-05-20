@@ -99,7 +99,7 @@ void Game::PacketReceived(const BCNet::Packet packet)
 
 	switch (id)
 	{
-		case (PacketID)BCNet::DefaultPacketID::PACKET_SERVER: // Server message.
+		case (PacketID)BCNet::DefaultPacketID::PACKET_SERVER: // Need this to see messages from server.
 		{
 			// Print packet.
 			std::string message;
