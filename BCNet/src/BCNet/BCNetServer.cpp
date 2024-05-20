@@ -599,7 +599,9 @@ void BCNetServer::OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChan
 		case k_ESteamNetworkingConnectionState_Connected:
 		{
 			auto itClient = m_connectedClients.find(pInfo->m_hConn);
-			assert(itClient != m_connectedClients.end());
+			//assert(itClient != m_connectedClients.end());
+			if (itClient == m_connectedClients.end())
+				break;
 
 			// Handle on client connected.
 			std::cout << "Client connected. " << pInfo->m_info.m_szConnectionDescription << std::endl;
