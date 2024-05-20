@@ -57,6 +57,8 @@ namespace BCNet
 
 		virtual std::string GetLatestOutput() override;
 
+		virtual unsigned int GetConnectedCount() override { return m_clientCount; }
+
 	private:
 		void DoNetworking(); // The main network thread function.
 

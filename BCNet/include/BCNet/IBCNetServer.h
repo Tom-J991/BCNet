@@ -175,6 +175,11 @@ namespace BCNet
 		/// </summary>
 		virtual std::string GetLatestOutput() = 0;
 
+		/// <summary>
+		/// Gets how many clients are currently connected to the server.
+		/// </summary>
+		virtual unsigned int GetConnectedCount() = 0;
+
 	};
 
 	/// <summary>
