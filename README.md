@@ -2,7 +2,7 @@
 # BCNet
 ![BCNet Logo](img/logo.png?raw=true)
 
-BCNet is a high-level game networking library written in C++. 
+**BCNet** is a high-level TCP-style game networking library written in C++. 
 
 This library utilises Valve’s “GameNetworkingSockets” and includes simple modular interfaces for both client and server applications along with additional utilities allowing the user to easily handle and transmit packets across a network for their game or application.
 
@@ -12,7 +12,7 @@ Currently, it can only be built as an x64 library and only using Visual Studio, 
 
 Due to the dependencies, it is currently required to have their DLLs next to the application whether it is linking against the shared library or not, in a future build this may be fixed as it requires the dependencies to be built as a static library.
 
-As stated before, this library relies on “GameNetworkingSockets” and the dependencies that come with it. Due to the nature of this library, networking with this API is TCP style.
+As stated before, this library relies on “GameNetworkingSockets” and the dependencies that come with it, also the examples provided with the library rely on “Raylib” for rendering.
 
 # API
 
