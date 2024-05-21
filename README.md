@@ -41,4 +41,4 @@ If you are linking against the static version of the library, you will need to a
 The most minimum version of the C++ Standard the library supports is C++17, though it is recommended to build the library and your application using the latest standard.
 
 ## Troubleshooting
-- If your solution doesn’t build the first time when referencing the library’s project with your application, then try doing a rebuild of the application only.
+- If your solution doesn’t build the first time when referencing the library’s project with your application because of a symbol error with “InitClient” or “InitServer”, then try doing a rebuild of the application(s).
