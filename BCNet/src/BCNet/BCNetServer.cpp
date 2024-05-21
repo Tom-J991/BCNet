@@ -592,6 +592,13 @@ void BCNetServer::OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChan
 				break;
 			}
 
+			if ((m_clientCount + 1) > m_maxClients) // Handle too many clients.
+			{
+				m_interface->CloseConnection(pInfo->m_hConn, 0, "Server is full!", false);
+				Log("Server is full!");
+				break;
+			}
+
 			auto &client = m_connectedClients[pInfo->m_hConn]; // Add client to map and get reference.
 
 			// Setup client defaults.

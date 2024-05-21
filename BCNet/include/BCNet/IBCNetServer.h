@@ -63,6 +63,12 @@ namespace BCNet
 		virtual bool IsConnected() = 0;
 
 		/// <summary>
+		/// Sets the maximum amount of clients that can connect to the server.
+		/// The default is 12.
+		/// </summary>
+		virtual void SetMaxClients(unsigned int max) = 0;
+
+		/// <summary>
 		/// Gets how many clients are currently connected to the server.
 		/// </summary>
 		virtual unsigned int GetConnectedCount() = 0;

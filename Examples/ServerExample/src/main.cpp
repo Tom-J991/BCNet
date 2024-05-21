@@ -90,6 +90,9 @@ int main()
 	BCNet::ServerCommandCallback echoCommand = DoEchoCommand;
 	g_server->AddCustomCommand("/echo", echoCommand);
 
+	// Set max clients.
+	g_server->SetMaxClients(2);
+
 	// Run Server.
 	g_server->Start();
 	g_server->Stop(); // g_server->Start() calls a loop so we can do this immediately after without really any problems.

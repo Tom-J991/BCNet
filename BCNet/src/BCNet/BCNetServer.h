@@ -33,6 +33,9 @@ namespace BCNet
 		virtual bool IsRunning() override { return !m_shouldQuit; }
 		virtual bool IsConnected() override { return m_networking; }
 
+		virtual void SetMaxClients(unsigned int max) override { m_maxClients = max; }
+		virtual unsigned int GetConnectedCount() override { return m_clientCount; }
+
 		virtual void SetConnectedCallback(const ConnectedCallback &callback) override;
 		virtual void SetDisconnectedCallback(const DisconnectedCallback &callback) override;
 		virtual void SetPacketReceivedCallback(const PacketReceivedCallback &callback) override;
@@ -58,8 +61,6 @@ namespace BCNet
 		virtual void SetMaxOutputLog(unsigned int max) override { m_maxOutputLog = max; };
 
 		virtual std::string GetLatestOutput() override;
-
-		virtual unsigned int GetConnectedCount() override { return m_clientCount; }
 
 	private:
 		void DoNetworking(); // The main network thread function.
@@ -95,6 +96,7 @@ namespace BCNet
 		uint32 m_listenSocket;
 		uint32 m_pollGroup;
 
+		unsigned int m_maxClients = 12;
 		std::map<uint32, ClientInfo> m_connectedClients; // <HSteamNetConnection, ClientInfo>
 		int m_clientCount = 0;
 
