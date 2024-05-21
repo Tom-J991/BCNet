@@ -11,7 +11,7 @@ MessageObject::~MessageObject()
 {
 }
 
-void MessageObject::Init(Vector2 position, std::string text, float lifeTime, float decayOffset, unsigned int fontSize, Color color)
+void MessageObject::Init(Vector2 position, std::string text, float lifeTime, float decayOffset, unsigned int fontSize, Color color, unsigned int index)
 {
 	data.m_postion = position;
 	data.m_startPosition = position;
@@ -24,7 +24,9 @@ void MessageObject::Init(Vector2 position, std::string text, float lifeTime, flo
 	data.m_fontSize = fontSize;
 	data.m_color = color;
 
-	m_timeLeft = lifeTime;
+	data.m_index = index;
+
+	m_timeLeft = data.m_lifeTime;
 }
 
 bool MessageObject::Update(double deltaTime)
@@ -32,15 +34,16 @@ bool MessageObject::Update(double deltaTime)
 	if (!InUse())
 		return false;
 
-	const Vector2 endPosition = { (float)data.m_postion.x, -(float)data.m_fontSize };
-	float percent = 1.0f - (m_timeLeft / data.m_lifeTime);
-	data.m_postion = Vector2Lerp(data.m_startPosition, endPosition, percent);
+	float percent = (m_timeLeft / data.m_lifeTime);
+	float invPercent = 1.0f - percent;
+
+	data.m_postion = { data.m_startPosition.x, data.m_startPosition.y + (data.m_index * 16.0f) };
 
 	data.m_clock += (float)deltaTime;
 	if (data.m_clock > data.m_decayOffset)
 		m_timeLeft -= (float)deltaTime;
 
-	data.m_color.a = (unsigned char)((m_timeLeft / data.m_lifeTime) * 255);
+	data.m_color.a = (unsigned char)(percent * 255);
 
 	return m_timeLeft <= 0.0f;
 }

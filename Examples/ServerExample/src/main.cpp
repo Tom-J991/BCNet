@@ -27,7 +27,7 @@ void PacketReceived(const BCNet::ClientInfo &clientData, const BCNet::Packet pac
 			const char *msg = message.c_str();
 
 			sprintf_s(temp, "[%s]: %s", clientData.nickName.c_str(), msg);
-			std::cout << temp << std::endl;
+			g_server->Log(temp);
 			std::string s(temp);
 
 			BCNet::Packet packet;
@@ -51,8 +51,8 @@ void DoEchoCommand(const std::string parameters) // Echo command implementation.
 {
 	if (parameters.empty())
 	{
-		std::cout << "Command Usage: " << std::endl;
-		std::cout << "\t" << "/echo [message]" << std::endl;
+		g_server->Log("Command Usage : ");
+		g_server->Log("\t/echo[message]");
 		return;
 	}
 
@@ -65,7 +65,7 @@ void DoEchoCommand(const std::string parameters) // Echo command implementation.
 	sprintf_s(temp, "[%s]: %s", "Server", message);
 	std::string s(temp);
 
-	std::cout << s << std::endl;
+	g_server->Log(s);
 
 	BCNet::Packet packet;
 	packet.Allocate(1024);

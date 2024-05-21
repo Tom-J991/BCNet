@@ -187,6 +187,9 @@ void BCNetClient::CloseConnection()
 
 std::string BCNetClient::GetLatestOutput()
 {
+	// TODO: Fix bug that gives garabage output?
+	if (m_outputLog.back().empty())
+		return "\0";
 	return m_outputLog.back(); // Back of the queue should always be the latest.
 }
 
@@ -295,7 +298,7 @@ void BCNetClient::HandleUserCommands()
 		if (commandFinished)
 			continue;
 
-		std::cout << "Invalid command entered." << std::endl;
+		Log("Invalid command entered.");
 	}
 }
 
@@ -363,6 +366,13 @@ void BCNetClient::ParseCommand(const std::string &command, std::string *outComma
 void BCNetClient::AddCustomCommand(std::string command, ClientCommandCallback callback)
 {
 	m_commandCallbacks[command] = callback;
+}
+
+void BCNetClient::PushInputAsCommand(std::string input)
+{
+	m_mutexCommandQueue.lock();
+	m_commandQueue.push(input);
+	m_mutexCommandQueue.unlock();
 }
 
 // Gathers all the commands into a string.
@@ -460,7 +470,7 @@ void BCNetClient::DoDisconnectCommand(const std::string parameters) // /disconne
 {
 	if (m_connectionStatus != ConnectionStatus::CONNECTED)
 	{
-		std::cout << "Warning: Client is not connected to a server." << std::endl;
+		Log("Warning: Client is not connected to a server.");
 		return;
 	}
 
@@ -477,14 +487,14 @@ void BCNetClient::DoNickNameCommand(const std::string parameters)
 {
 	if (m_connectionStatus != ConnectionStatus::CONNECTED)
 	{
-		std::cout << "Warning: Client is not connected to a server." << std::endl;
+		Log("Warning: Client is not connected to a server.");
 		return;
 	}
 
 	if (parameters.empty())
 	{
-		std::cout << "Command usage: " << std::endl;
-		std::cout << "\t" << "/nick [Nickname]" << std::endl;
+		Log("Command usage: ");
+		Log("\t/nick [Nickname]");
 		return;
 	}
 
@@ -509,7 +519,7 @@ void BCNetClient::DoWhosOnlineCommand(const std::string parameters)
 {
 	if (m_connectionStatus != ConnectionStatus::CONNECTED)
 	{
-		std::cout << "Warning: Client is not connected to a server." << std::endl;
+		Log("Warning: Client is not connected to a server.");
 		return;
 	}
 
@@ -532,15 +542,15 @@ void BCNetClient::DoConnectCommand(const std::string parameters) // /connect [IP
 {
 	if (m_connectionStatus == ConnectionStatus::CONNECTED)
 	{
-		std::cout << "Warning: Client is already connected to a server." << std::endl;
+		Log("Warning: Client is already connected to a server.");
 		return;
 	}
 
 	if (parameters.empty()) // No parameters, don't do anything.
 	{
-		std::cout << "Command usage: " << std::endl;
-		std::cout << "\t" << "/connect [IP] [Port]" << std::endl;
-		std::cout << "\t" << "/join [IP] [Port]" << std::endl;
+		Log("Command usage: ");
+		Log("\t/connect [IP] [Port]");
+		Log("\t/join [IP] [Port]");
 		return;
 	}
 

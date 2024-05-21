@@ -25,6 +25,7 @@ Game::~Game()
 
 bool Game::Run(std::string windowTitle, unsigned int windowWidth, unsigned int windowHeight, bool fullscreen)
 {
+	// Raylib Boilerplate.
 	InitAudioDevice();
 	InitWindow(windowWidth, windowHeight, windowTitle.c_str());
 	SetTargetFPS(60);
@@ -65,6 +66,7 @@ bool Game::Start()
 	m_networkClient->SetPacketReceivedCallback(BIND_CLIENT_PACKET_RECEIVED_CALLBACK(Game::PacketReceived));
 	m_networkClient->SetOutputLogCallback(BIND_CLIENT_OUTPUT_LOG_CALLBACK(Game::OutputLog));
 
+	// Add a custom command.
 	BCNet::ClientCommandCallback echoCommand = BIND_COMMAND(Game::DoEchoCommand);
 	m_networkClient->AddCustomCommand("/echo", echoCommand);
 	m_networkClient->Start();
@@ -81,6 +83,47 @@ void Game::Update(double deltaTime)
 {
 	m_outputPool.Update(deltaTime);
 	//std::cout << "Active " << m_outputPool.GetActiveCount() << std::endl;
+
+	// Handle user input.
+	int key = GetCharPressed();
+	while (key > 0)
+	{
+		// Limit key range so that the user can only input what they should be.
+		if ((key >= 32) && (key <= 125) && (m_inputCount < MAX_INPUT))
+		{
+			m_inputArr[m_inputCount] = (char)key;
+			m_inputArr[m_inputCount+1] = '\0'; // Null terminator.
+			m_inputCount++;
+		}
+
+		key = GetCharPressed();
+	}
+
+	if (IsKeyPressed(KEY_BACKSPACE)) // Erase input.
+	{
+		m_inputCount--;
+		if (m_inputCount < 0)
+			m_inputCount = 0;
+		m_inputArr[m_inputCount] = '\0'; // Null terminator.
+	}
+
+	if (IsKeyPressed(KEY_ENTER)) // Enter input as command.
+	{
+		m_lastInputCount = m_inputCount;
+		strncpy_s(m_lastInputArr, m_inputArr, m_inputCount);
+
+		m_networkClient->PushInputAsCommand(std::string(m_inputArr));
+		m_inputCount = 0;
+		m_inputArr[m_inputCount] = '\0'; // Null terminator.
+	}
+
+	if (IsKeyPressed(KEY_UP)) // Get last input.
+	{
+		m_inputCount = m_lastInputCount;
+		strncpy_s(m_inputArr, m_lastInputArr, m_lastInputCount);
+	}
+
+	m_frameCount++;
 }
 
 void Game::Draw()
@@ -88,6 +131,14 @@ void Game::Draw()
 	ClearBackground(RAYWHITE);
 
 	m_outputPool.Draw(false);
+
+	// Draw whatever the user is typing in.
+	DrawText(m_inputArr, 12, SCREEN_HEIGHT-24-12, 24, BLACK);
+	if (m_inputCount < MAX_INPUT)
+	{
+		// Draw flashing underscore.
+		if ((m_frameCount / 24) % 2) DrawText("_", 12 + MeasureText(m_inputArr, 24) + 2, SCREEN_HEIGHT-24-12, 24, BLACK);
+	}
 }
 
 void Game::PacketReceived(const BCNet::Packet packet)
@@ -105,7 +156,7 @@ void Game::PacketReceived(const BCNet::Packet packet)
 			std::string message;
 			packetReader >> message;
 
-			std::cout << message << std::endl;
+			m_networkClient->Log(message);
 		} break;
 		case PacketID::PACKET_TEXT_MESSAGE: // Chat message.
 		{
@@ -124,21 +175,22 @@ void Game::PacketReceived(const BCNet::Packet packet)
 
 void Game::OutputLog()
 {
-	m_outputPool.Create({ 12.0f, 12.0f + (m_outputPool.GetActiveCount() * 16.0f) }, m_networkClient->GetLatestOutput(), 1.0f, 1.0f, 16);
+	// Get whatever the latest output is from the network client and display it.
+	m_outputPool.Create({ 12.0f, 12.0f }, m_networkClient->GetLatestOutput(), 1.0f, 1.0f, 16);
 }
 
 void Game::DoEchoCommand(const std::string parameters)
 {
 	if (m_networkClient->GetConnectionStatus() != BCNet::IBCNetClient::ConnectionStatus::CONNECTED)
 	{
-		std::cout << "Warning: Client is not connected to a server." << std::endl;
+		m_networkClient->Log("Warning: Client is not connected to a server.");
 		return;
 	}
 
 	if (parameters.empty())
 	{
-		std::cout << "Command Usage: " << std::endl;
-		std::cout << "\t" << "/echo [message]" << std::endl;
+		m_networkClient->Log("Command Usage: ");
+		m_networkClient->Log("\t/echo [message]");
 		return;
 	}
 

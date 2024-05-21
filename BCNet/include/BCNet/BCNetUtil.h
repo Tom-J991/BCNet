@@ -6,10 +6,10 @@
 #include <functional>
 #include <utility>
 
+// Use either this or a lambda function when setting up custom commands.
 #define BIND_COMMAND(fn) std::bind(&fn, this, std::placeholders::_1)
 
 // Utility functions that are used throughout the API and can be used by the application.
-
 namespace BCNet
 {
 	/// <summary>

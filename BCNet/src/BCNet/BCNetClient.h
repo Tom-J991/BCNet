@@ -47,6 +47,8 @@ namespace BCNet
 		virtual std::string PrintCommandList() override;
 		virtual void AddCustomCommand(std::string command, ClientCommandCallback callback) override;
 
+		virtual void PushInputAsCommand(std::string input) override;
+
 		virtual void SendPacketToServer(const Packet &packet, bool reliable = true) override;
 
 		virtual ConnectionStatus &GetConnectionStatus() override { return m_connectionStatus; }

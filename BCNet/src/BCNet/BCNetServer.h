@@ -41,6 +41,8 @@ namespace BCNet
 		virtual std::string PrintCommandList() override;
 		virtual void AddCustomCommand(std::string command, ServerCommandCallback callback) override;
 
+		virtual void PushInputAsCommand(std::string input) override;
+
 		virtual std::string PrintConnectedUsers() override;
 
 		virtual void SetClientNickname(uint32 clientID, const std::string &nick) override;

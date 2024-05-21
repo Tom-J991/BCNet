@@ -9,6 +9,7 @@
 class MessagePool
 {
 public:
+	// Basic object pool.
 	MessagePool();
 	~MessagePool();
 

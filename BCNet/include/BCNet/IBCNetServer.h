@@ -6,6 +6,7 @@
 #include <functional>
 #include <utility>
 
+// Use either these or lambdas when setting up callbacks.
 #define BIND_SERVER_CONNECTED_CALLBACK(fn) std::bind(&fn, this, std::placeholders::_1)
 #define BIND_SERVER_DISCONNECTED_CALLBACK(fn) std::bind(&fn, this, std::placeholders::_1)
 #define BIND_SERVER_PACKET_RECEIVED_CALLBACK(fn) std::bind(&fn, this, std::placeholders::_1, std::placeholders::_2)
@@ -62,6 +63,11 @@ namespace BCNet
 		virtual bool IsConnected() = 0;
 
 		/// <summary>
+		/// Gets how many clients are currently connected to the server.
+		/// </summary>
+		virtual unsigned int GetConnectedCount() = 0;
+
+		/// <summary>
 		/// This callback is called whenever a client successfully connects to the server.
 		/// The callback function should have a reference to the ClientInfo as a parameter.
 		/// </summary>
@@ -95,6 +101,12 @@ namespace BCNet
 		/// <param name="command">The command the user must type, e.g. "/command".</param>
 		/// <param name="callback">The callback which the command will call, the command parameters are passed to the callback as an std::string.</param>
 		virtual void AddCustomCommand(std::string command, ServerCommandCallback callback) = 0;
+
+		/// <summary>
+		/// Allows input into the command queue outside of just the console.
+		/// </summary>
+		/// <param name="input">Input command into queue.</param>
+		virtual void PushInputAsCommand(std::string input) = 0;
 
 		/// <summary>
 		/// Returns a string listing all of the currently connected clients.
@@ -162,6 +174,7 @@ namespace BCNet
 
 		/// <summary>
 		/// Logs and outputs a message.
+		/// Use this if you want to be able to retrieve the message from GetLatestOutput()
 		/// </summary>
 		virtual void Log(std::string message) = 0;
 
@@ -174,11 +187,6 @@ namespace BCNet
 		/// Gets the latest message from the server's output log.
 		/// </summary>
 		virtual std::string GetLatestOutput() = 0;
-
-		/// <summary>
-		/// Gets how many clients are currently connected to the server.
-		/// </summary>
-		virtual unsigned int GetConnectedCount() = 0;
 
 	};
 

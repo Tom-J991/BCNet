@@ -10,7 +10,7 @@ public:
 	MessageObject();
 	~MessageObject();
 
-	void Init(Vector2 position, std::string text, float lifeTime, float decayOffset, unsigned int fontSize = 12, Color color = BLACK);
+	void Init(Vector2 position, std::string text, float lifeTime, float decayOffset, unsigned int fontSize = 12, Color color = BLACK, unsigned int index = 0);
 
 	bool Update(double deltaTime);
 	void Draw(bool centered = false);
@@ -19,6 +19,8 @@ public:
 	void SetNext(MessageObject *next) { this->next = next; }
 
 	inline bool InUse() { return m_timeLeft > 0.0f; }
+
+	void DecrementIndex() { data.m_index--; }
 
 private:
 	float m_timeLeft = 0.0f;
@@ -39,6 +41,8 @@ private:
 			float m_lifeTime = 1.0f;
 			float m_decayOffset = 1.0f;
 			float m_clock = 0.0f;
+
+			unsigned int m_index = 0;
 		} data;
 		MessageObject *next;
 	}; 

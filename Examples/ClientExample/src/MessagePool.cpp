@@ -24,7 +24,7 @@ void MessagePool::Create(Vector2 position, std::string text, float lifeTime, flo
 	MessageObject *newMessage = m_firstAvailable;
 	m_firstAvailable = newMessage->GetNext();
 
-	newMessage->Init(position, text, lifeTime, decayOffset, fontSize, color);
+	newMessage->Init(position, text, lifeTime, decayOffset, fontSize, color, m_activeMessages);
 
 	m_activeMessages++;
 }
@@ -38,6 +38,12 @@ void MessagePool::Update(double deltaTime)
 			m_pool[i].SetNext(m_firstAvailable);
 			m_firstAvailable = &m_pool[i];
 			m_activeMessages--;
+
+			for (int j = 0; j < MAX_SIZE; j++)
+			{
+				if (j != i)
+					m_pool[j].DecrementIndex();
+			}
 		}
 	}
 }

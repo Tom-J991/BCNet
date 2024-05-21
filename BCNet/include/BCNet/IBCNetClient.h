@@ -6,6 +6,7 @@
 #include <functional>
 #include <utility>
 
+// Use either these or lambdas when setting up callbacks.
 #define BIND_CLIENT_CONNECTED_CALLBACK(fn) std::bind(&fn, this)
 #define BIND_CLIENT_DISCONNECTED_CALLBACK(fn) std::bind(&fn, this)
 #define BIND_CLIENT_PACKET_RECEIVED_CALLBACK(fn) std::bind(&fn, this, std::placeholders::_1)
@@ -109,6 +110,12 @@ namespace BCNet
 		virtual void AddCustomCommand(std::string command, ClientCommandCallback callback) = 0;
 
 		/// <summary>
+		/// Allows input into the command queue outside of just the console.
+		/// </summary>
+		/// <param name="input">Input command into queue.</param>
+		virtual void PushInputAsCommand(std::string input) = 0;
+
+		/// <summary>
 		/// Sends the provided data through to the server.
 		/// </summary>
 		/// <param name="data">The data to send.</param>
@@ -133,6 +140,7 @@ namespace BCNet
 
 		/// <summary>
 		/// Logs and outputs a message.
+		/// Use this if you want to be able to retrieve the message from GetLatestOutput()
 		/// </summary>
 		virtual void Log(std::string message) = 0;
 

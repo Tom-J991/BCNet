@@ -40,4 +40,12 @@ protected:
 
 	MessagePool m_outputPool;
 
+	constexpr static unsigned int MAX_INPUT = 1024;
+	char m_inputArr[MAX_INPUT];
+	char m_lastInputArr[MAX_INPUT];
+	int m_inputCount = 0;
+	int m_lastInputCount = 0;
+
+	int m_frameCount = 0;
+
 };

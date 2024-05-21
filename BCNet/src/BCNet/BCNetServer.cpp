@@ -121,6 +121,9 @@ void BCNetServer::Stop()
 
 std::string BCNetServer::GetLatestOutput()
 {
+	// TODO: Fix bug that gives garabage output?
+	if (m_outputLog.back().empty())
+		return "\0";
 	return m_outputLog.back(); // Back of the queue should always be the latest.
 }
 
@@ -162,7 +165,7 @@ void BCNetServer::DoNetworking()
 		return;
 	}
 
-	std::cout << "Server started.." << std::endl;
+	Log("Server started..");
 
 	// Loop.
 	m_networking = true;
@@ -179,7 +182,7 @@ void BCNetServer::DoNetworking()
 	}
 
 	// Quit.
-	std::cout << "Closing all connections..." << std::endl;
+	Log("Closing all connections...");
 	for (auto [clientID, clientData] : m_connectedClients)
 	{
 		m_interface->CloseConnection(clientID, 0, "Server Shutdown", true);
@@ -196,7 +199,7 @@ void BCNetServer::DoNetworking()
 	std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Wait a bit for all connections to close.
 	GameNetworkingSockets_Kill();
 
-	std::cout << "Server Shutting down.." << std::endl;
+	Log("Server Shutting down..");
 }
 
 void BCNetServer::PollNetworkMessages()
@@ -212,7 +215,7 @@ void BCNetServer::PollNetworkMessages()
 		}
 		if (numMsgs < 0)
 		{
-			std::cout << "Error whilst polling incoming messages" << std::endl;
+			Log("Error whilst polling incoming messages");
 			m_networking = false;
 			break;
 		}
@@ -262,7 +265,7 @@ void BCNetServer::PollNetworkMessages()
 						else
 						{
 							std::string s(itClient->second.nickName + " is now " + nickName);
-							std::cout << s << std::endl;
+							Log(s);
 							packetWriter.WriteString(s);
 
 							SetClientNickname(msg->m_conn, nickName);
@@ -329,7 +332,7 @@ void BCNetServer::HandleUserCommands()
 		if (commandFinished)
 			continue;
 
-		std::cout << "Invalid command entered." << std::endl;
+		Log("Invalid command entered.");
 	}
 }
 
@@ -399,6 +402,13 @@ void BCNetServer::AddCustomCommand(std::string command, ServerCommandCallback ca
 	m_commandCallbacks[command] = callback;
 }
 
+void BCNetServer::PushInputAsCommand(std::string input)
+{
+	m_mutexCommandQueue.lock();
+	m_commandQueue.push(input);
+	m_mutexCommandQueue.unlock();
+}
+
 // Gathers all the commands into a string.
 std::string BCNetServer::PrintCommandList()
 {
@@ -457,11 +467,11 @@ void BCNetServer::KickClient(uint32 clientID)
 	auto it = m_connectedClients.find(clientID);
 	if (it == m_connectedClients.end())
 	{
-		std::cout << "Error: Could not kick client because ID [" << (int)clientID << "] is not connected!" << std::endl;
+		Log("Error: Could not kick client because ID [" + std::to_string((int)clientID) + "] is not connected!");
 		return;
 	}
 
-	std::cout << "Kicked " << it->second.nickName << " [" << (int)clientID << "]" << std::endl;
+	Log("Kicked " + it->second.nickName + " [" + std::to_string((int)clientID) + "]");
 	m_interface->CloseConnection(clientID, 0, "Kicked by server", false);
 
 	m_connectedClients.erase(clientID);
@@ -485,11 +495,11 @@ void BCNetServer::KickClient(const std::string &nickName)
 
 	if (found == false)
 	{
-		std::cout << "Error: Could not kick client because User [" << nickName << "] is not connected!" << std::endl;
+		Log("Error: Could not kick client because User [" + nickName + "] is not connected!");
 		return;
 	}
 
-	std::cout << "Kicked " << nickName << " [" << (int)clientID << "]" << std::endl;
+	Log("Kicked " + nickName + " [" + std::to_string((int)clientID) + "]");
 	m_interface->CloseConnection(clientID, 0, "Kicked by server", false);
 
 	m_connectedClients.erase(clientID);
@@ -534,8 +544,8 @@ void BCNetServer::OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChan
 					debugAction = "closed by peer";
 				}
 
-				std::cout << "Connection " << pInfo->m_info.m_szConnectionDescription << " " << debugAction << ", " <<
-					pInfo->m_info.m_eEndReason << ": " << pInfo->m_info.m_szEndDebug << std::endl;
+				Log("Connection " + std::string(pInfo->m_info.m_szConnectionDescription) + " " + std::string(debugAction) + ", " +
+					std::to_string(pInfo->m_info.m_eEndReason) + ": " + std::string(pInfo->m_info.m_szEndDebug));
 
 				Packet packet;
 				packet.Allocate(1024);
@@ -566,19 +576,19 @@ void BCNetServer::OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChan
 			// Handle incoming connections.
 			assert(m_connectedClients.find(pInfo->m_hConn) == m_connectedClients.end());
 
-			std::cout << "Incoming connection " << pInfo->m_info.m_szConnectionDescription << std::endl;
+			Log("Incoming connection " + std::string(pInfo->m_info.m_szConnectionDescription));
 
 			if (m_interface->AcceptConnection(pInfo->m_hConn) != k_EResultOK)
 			{
 				m_interface->CloseConnection(pInfo->m_hConn, 0, nullptr, false);
-				std::cout << "Incoming connection failed. (was it already closed?)" << std::endl;
+				Log("Incoming connection failed. (was it already closed?)");
 				break;
 			}
 
 			if (!m_interface->SetConnectionPollGroup(pInfo->m_hConn, m_pollGroup))
 			{
 				m_interface->CloseConnection(pInfo->m_hConn, 0, nullptr, false);
-				std::cout << "Failed to set poll group on incoming connection." << std::endl;
+				Log("Failed to set poll group on incoming connection.");
 				break;
 			}
 
@@ -604,11 +614,11 @@ void BCNetServer::OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChan
 				break;
 
 			// Handle on client connected.
-			std::cout << "Client connected. " << pInfo->m_info.m_szConnectionDescription << std::endl;
+			Log("Client connected. " + std::string(pInfo->m_info.m_szConnectionDescription));
 
 			// Relay connection info.
 			std::string userList = PrintConnectedUsers();
-			std::cout << userList << std::endl;
+			Log(userList);
 
 			std::string peerText(itClient->second.nickName + " has connected!");
 
@@ -654,9 +664,9 @@ void BCNetServer::DoKickCommand(const std::string parameters) // /kick {-id [ID]
 {
 	if (parameters.empty()) // No parameters, don't do anything.
 	{
-		std::cout << "Command usage: " << std::endl;
-		std::cout << "\t" << "/kick -id [ID]" << std::endl;
-		std::cout << "\t" << "/kick -user [User Name]" << std::endl;
+		Log("Command usage: ");
+		Log("\t/kick -id [ID]");
+		Log("\t/kick -user [User Name]");
 		return;
 	}
 
@@ -668,7 +678,7 @@ void BCNetServer::DoKickCommand(const std::string parameters) // /kick {-id [ID]
 	if (strstr(parameters.c_str(), "-user") != nullptr &&
 		strstr(parameters.c_str(), "-id") != nullptr)
 	{
-		std::cout << "Error: Cannot use both parameters (-user & -id) at once!" << std::endl;
+		Log("Error: Cannot use both parameters (-user & -id) at once!");
 		return;
 	}
 
@@ -682,7 +692,7 @@ void BCNetServer::DoKickCommand(const std::string parameters) // /kick {-id [ID]
 				continue;
 
 			const char *name = params[i];
-			std::cout << "Kicked User: " << name << std::endl;
+			Log("Kicked User: " + std::string(name));
 			KickClient(name);
 			continue;
 		}
@@ -694,10 +704,10 @@ void BCNetServer::DoKickCommand(const std::string parameters) // /kick {-id [ID]
 
 			uint32 id = (uint32)std::stoul(params[i]);
 			KickClient(id);
-			std::cout << "Kicked User (ID: " << id << ")" << std::endl;
+			Log("Kicked User (ID: " + std::to_string(id) + ")");
 			continue;
 		}
 
-		std::cout << "Warning: Unknown parameter specified \"" << params[i] << "\"" << std::endl;
+		Log("Warning: Unknown parameter specified \"" + std::string(params[i]) + "\"");
 	}
 }
