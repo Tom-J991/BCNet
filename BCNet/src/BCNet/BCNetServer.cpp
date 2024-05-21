@@ -37,17 +37,17 @@ BCNetServer::~BCNetServer()
 	m_networking = false;
 }
 
-void BCNetServer::SetConnectedCallback(const ConnectedCallback &callback)
+void BCNetServer::SetConnectedCallback(const ServerConnectedCallback &callback)
 {
 	m_connectedCallback = callback;
 }
 
-void BCNetServer::SetDisconnectedCallback(const DisconnectedCallback &callback)
+void BCNetServer::SetDisconnectedCallback(const ServerDisconnectedCallback &callback)
 {
 	m_disconnectedCallback = callback;
 }
 
-void BCNetServer::SetPacketReceivedCallback(const PacketReceivedCallback &callback)
+void BCNetServer::SetPacketReceivedCallback(const ServerPacketReceivedCallback &callback)
 {
 	m_packetReceivedCallback = callback;
 }

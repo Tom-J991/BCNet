@@ -39,9 +39,9 @@ namespace BCNet
 		virtual bool IsRunning() override { return !m_shouldQuit; }
 		virtual bool IsConnected() override { return m_networking; }
 
-		virtual void SetConnectedCallback(const ConnectedCallback &callback) override;
-		virtual void SetDisconnectedCallback(const DisconnectedCallback &callback) override;
-		virtual void SetPacketReceivedCallback(const PacketReceivedCallback &callback) override;
+		virtual void SetConnectedCallback(const ClientConnectedCallback &callback) override;
+		virtual void SetDisconnectedCallback(const ClientDisconnectedCallback &callback) override;
+		virtual void SetPacketReceivedCallback(const ClientPacketReceivedCallback &callback) override;
 		virtual void SetOutputLogCallback(const ClientOutputLogCallback &callback) override;
 
 		virtual std::string PrintCommandList() override;
@@ -97,9 +97,9 @@ namespace BCNet
 
 		ConnectionStatus m_connectionStatus = ConnectionStatus::DISCONNECTED;
 
-		ConnectedCallback m_connectedCallback;
-		DisconnectedCallback m_disconnectedCallback;
-		PacketReceivedCallback m_packetReceivedCallback;
+		ClientConnectedCallback m_connectedCallback;
+		ClientDisconnectedCallback m_disconnectedCallback;
+		ClientPacketReceivedCallback m_packetReceivedCallback;
 		ClientOutputLogCallback m_outputLogCallback;
 
 		unsigned int m_maxOutputLog = 12;

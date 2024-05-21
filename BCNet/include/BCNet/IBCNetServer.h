@@ -26,9 +26,9 @@ namespace BCNet
 
 	using ServerCommandCallback = std::function<void(const std::string)>;
 	using ServerOutputLogCallback = std::function<void()>;
-	using ConnectedCallback = std::function<void(const ClientInfo &)>;
-	using DisconnectedCallback = std::function<void(const ClientInfo &)>;
-	using PacketReceivedCallback = std::function<void(const ClientInfo &, const Packet)>;
+	using ServerConnectedCallback = std::function<void(const ClientInfo &)>;
+	using ServerDisconnectedCallback = std::function<void(const ClientInfo &)>;
+	using ServerPacketReceivedCallback = std::function<void(const ClientInfo &, const Packet)>;
 	
 	/// <summary>
 	/// Server Interface.
@@ -77,13 +77,13 @@ namespace BCNet
 		/// This callback is called whenever a client successfully connects to the server.
 		/// The callback function should have a reference to the ClientInfo as a parameter.
 		/// </summary>
-		virtual void SetConnectedCallback(const ConnectedCallback &callback) = 0;
+		virtual void SetConnectedCallback(const ServerConnectedCallback &callback) = 0;
 
 		/// <summary>
 		/// This callback is called whenever a client disconnects from the server.
 		/// The callback function should have a reference to the ClientInfo as a parameter.
 		/// </summary>
-		virtual void SetDisconnectedCallback(const DisconnectedCallback &callback) = 0;
+		virtual void SetDisconnectedCallback(const ServerDisconnectedCallback &callback) = 0;
 
 		/// <summary>
 		/// This callback is called whenever the client logs a message.
@@ -94,7 +94,7 @@ namespace BCNet
 		/// This callback is called whenever the server receives a packet.
 		/// The callback function should have a reference to the ClientInfo as a parameter, as well as a copy of the Received Packet.
 		/// </summary>
-		virtual void SetPacketReceivedCallback(const PacketReceivedCallback &callback) = 0;
+		virtual void SetPacketReceivedCallback(const ServerPacketReceivedCallback &callback) = 0;
 
 		/// <summary>
 		/// Returns a string describing all the commands the user can use to interact with the server.

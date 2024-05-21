@@ -20,9 +20,9 @@ namespace BCNet
 	
 	using ClientCommandCallback = std::function<void(const std::string)>;
 	using ClientOutputLogCallback = std::function<void()>;
-	using ConnectedCallback = std::function<void()>;
-	using DisconnectedCallback = std::function<void()>;
-	using PacketReceivedCallback = std::function<void(const Packet)>;
+	using ClientConnectedCallback = std::function<void()>;
+	using ClientDisconnectedCallback = std::function<void()>;
+	using ClientPacketReceivedCallback = std::function<void(const Packet)>;
 
 	/// <summary>
 	/// Client Interface.
@@ -79,18 +79,18 @@ namespace BCNet
 		/// <summary>
 		/// This callback is called when the client successfully connects to the server.
 		/// </summary>
-		virtual void SetConnectedCallback(const ConnectedCallback &callback) = 0;
+		virtual void SetConnectedCallback(const ClientConnectedCallback &callback) = 0;
 
 		/// <summary>
 		/// This callback is called when the client disconnects from the server.
 		/// </summary>
-		virtual void SetDisconnectedCallback(const DisconnectedCallback &callback) = 0;
+		virtual void SetDisconnectedCallback(const ClientDisconnectedCallback &callback) = 0;
 
 		/// <summary>
 		/// This callback is called whenever the client receives a packet.
 		/// The callback function should have a copy of the received packet as a parameter.
 		/// </summary>
-		virtual void SetPacketReceivedCallback(const PacketReceivedCallback &callback) = 0;
+		virtual void SetPacketReceivedCallback(const ClientPacketReceivedCallback &callback) = 0;
 
 		/// <summary>
 		/// This callback is called whenever the client logs a message.

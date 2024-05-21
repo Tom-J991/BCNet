@@ -35,17 +35,17 @@ BCNetClient::~BCNetClient()
 		m_commandThread.join(); // Wait for the thread to finish execution.
 }
 
-void BCNetClient::SetConnectedCallback(const ConnectedCallback &callback)
+void BCNetClient::SetConnectedCallback(const ClientConnectedCallback &callback)
 {
 	m_connectedCallback = callback;
 }
 
-void BCNetClient::SetDisconnectedCallback(const DisconnectedCallback &callback)
+void BCNetClient::SetDisconnectedCallback(const ClientDisconnectedCallback &callback)
 {
 	m_disconnectedCallback = callback;
 }
 
-void BCNetClient::SetPacketReceivedCallback(const PacketReceivedCallback &callback)
+void BCNetClient::SetPacketReceivedCallback(const ClientPacketReceivedCallback &callback)
 {
 	m_packetReceivedCallback = callback;
 }

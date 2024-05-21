@@ -36,9 +36,9 @@ namespace BCNet
 		virtual void SetMaxClients(unsigned int max) override { m_maxClients = max; }
 		virtual unsigned int GetConnectedCount() override { return m_clientCount; }
 
-		virtual void SetConnectedCallback(const ConnectedCallback &callback) override;
-		virtual void SetDisconnectedCallback(const DisconnectedCallback &callback) override;
-		virtual void SetPacketReceivedCallback(const PacketReceivedCallback &callback) override;
+		virtual void SetConnectedCallback(const ServerConnectedCallback &callback) override;
+		virtual void SetDisconnectedCallback(const ServerDisconnectedCallback &callback) override;
+		virtual void SetPacketReceivedCallback(const ServerPacketReceivedCallback &callback) override;
 		virtual void SetOutputLogCallback(const ServerOutputLogCallback &callback) override;
 
 		virtual std::string PrintCommandList() override;
@@ -100,9 +100,9 @@ namespace BCNet
 		std::map<uint32, ClientInfo> m_connectedClients; // <HSteamNetConnection, ClientInfo>
 		int m_clientCount = 0;
 
-		ConnectedCallback m_connectedCallback;
-		DisconnectedCallback m_disconnectedCallback;
-		PacketReceivedCallback m_packetReceivedCallback;
+		ServerConnectedCallback m_connectedCallback;
+		ServerDisconnectedCallback m_disconnectedCallback;
+		ServerPacketReceivedCallback m_packetReceivedCallback;
 		ServerOutputLogCallback m_outputLogCallback;
 
 		unsigned int m_maxOutputLog = 12;
