@@ -44,12 +44,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(ProjectDir)obj\static\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\static\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Platform)\$(Configuration)\static\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(ProjectDir)obj\static\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\static\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Platform)\$(Configuration)\static\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -70,7 +70,7 @@
       <AdditionalDependencies>GameNetworkingSockets.lib;</AdditionalDependencies>
     </Lib>
     <PostBuildEvent>
-      <Command>FOR /R "$(ProjectDir)external\GameNetworkingSockets\lib\Debug\" %%G IN (*.dll) DO (XCOPY %%G "$(SolutionDir)bin\$(Platform)\$(Configuration)\" /y /f)</Command>
+      <Command>FOR /R "$(ProjectDir)external\GameNetworkingSockets\lib\Debug\" %%G IN (*.dll) DO (XCOPY %%G "$(SolutionDir)bin\$(Platform)\$(Configuration)\static\" /y /f)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -96,7 +96,7 @@
       <AdditionalDependencies>GameNetworkingSockets.lib;</AdditionalDependencies>
     </Lib>
     <PostBuildEvent>
-      <Command>FOR /R "$(ProjectDir)external\GameNetworkingSockets\lib\Release\" %%G IN (*.dll) DO (XCOPY %%G "$(SolutionDir)bin\$(Platform)\$(Configuration)\" /y /f)</Command>
+      <Command>FOR /R "$(ProjectDir)external\GameNetworkingSockets\lib\Release\" %%G IN (*.dll) DO (XCOPY %%G "$(SolutionDir)bin\$(Platform)\$(Configuration)\static\" /y /f)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
